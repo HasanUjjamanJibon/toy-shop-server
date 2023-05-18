@@ -49,6 +49,29 @@ async function run() {
       const result = await toysCollection.findOne(query);
       res.send(result);
     });
+    // step :4
+    app.put("/toy/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = req.body;
+      const options = { upsert: true };
+      const toy = {
+        $set: {
+          sellerName: updateDoc.sellerName,
+          sellerEmail: updateDoc.sellerEmail,
+          toyName: updateDoc.toyName,
+          quantity: updateDoc.quantity,
+          photoUrl: updateDoc.photoUrl,
+          price: updateDoc.price,
+          subCategory: updateDoc.subCategory,
+          ratings: updateDoc.ratings,
+          description: updateDoc.description,
+        },
+      };
+      const result = await toysCollection.updateOne(query, toy, options);
+      console.log(updateDoc);
+      res.send(result);
+    });
 
     // step : 4
     app.delete("/toy/:id", async (req, res) => {
@@ -66,6 +89,7 @@ async function run() {
     console.log("finally connected to MongoDB");
   }
 }
+
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
