@@ -30,8 +30,16 @@ async function run() {
     // step:1 - post route create
     app.post("/all_toys", async (req, res) => {
       const newToys = req.body;
+      console.log(newToys);
       const result = await toysCollection.insertOne(newToys);
       console.log(result);
+      res.send(result);
+    });
+
+    // step:2
+    app.get("/alltoys", async (req, res) => {
+      const toys = toysCollection.find();
+      const result = await toys.toArray();
       res.send(result);
     });
 
