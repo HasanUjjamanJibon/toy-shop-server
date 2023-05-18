@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -40,6 +40,14 @@ async function run() {
     app.get("/alltoys", async (req, res) => {
       const toys = toysCollection.find();
       const result = await toys.toArray();
+      res.send(result);
+    });
+
+    // step :3
+    app.get("/toy/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await toysCollection.findOne(query);
       res.send(result);
     });
 
