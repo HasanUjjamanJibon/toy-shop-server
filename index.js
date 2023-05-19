@@ -30,7 +30,7 @@ async function run() {
     // step:1 - post route create
     app.post("/all_toys", async (req, res) => {
       const newToys = req.body;
-      console.log(newToys);
+
       const result = await toysCollection.insertOne(newToys);
       res.send(result);
     });
@@ -69,7 +69,6 @@ async function run() {
         },
       };
       const result = await toysCollection.updateOne(query, toy, options);
-      console.log(updateDoc);
       res.send(result);
     });
 
@@ -82,7 +81,6 @@ async function run() {
     });
     // step:6
     app.get("/toys", async (req, res) => {
-      console.log(req.query);
       let query = {};
       if (req.query?.email) {
         query = { sellerEmail: req.query?.email };
@@ -92,7 +90,20 @@ async function run() {
       res.send(result);
     });
 
-
+    // step:3
+    app.get("/alltoys/:category", async (req, res) => {
+      if (req.params.category == "All") {
+        const result = await toysCollection.find().toArray();
+        console.log(result);
+        res.send(result);
+      } else {
+        const result = await toysCollection
+          .find({ subCategory: req.params.category })
+          .toArray();
+        console.log(result);
+        res.send(result);
+      }
+    });
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
