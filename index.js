@@ -28,7 +28,7 @@ async function run() {
     const toysCollection = await client.db("ToysDB").collection("Toys");
     const indexKeys = { toyName: 1 };
     const indexOptions = { name: "toyNameTitle" };
-    const result = await toysCollection.createIndex(indexKeys, indexOptions)
+    const result = await toysCollection.createIndex(indexKeys, indexOptions);
     // step:1 - post route create
     app.post("/all_toys", async (req, res) => {
       const newToys = req.body;
@@ -88,7 +88,7 @@ async function run() {
       if (req.query?.email) {
         query = { sellerEmail: req.query?.email };
       }
-      const toys = toysCollection.find(query).sort({ price: -1 });
+      const toys = toysCollection.find(query);
       const result = await toys.toArray();
       res.send(result);
     });
@@ -110,7 +110,6 @@ async function run() {
 
     // step : 8
     app.get("/findtoy/:search", async (req, res) => {
-
       let searctText = req.params.search;
       const result = await toysCollection
         .find({ toyName: { $regex: searctText, $options: "i" } })
@@ -118,27 +117,45 @@ async function run() {
       res.send(result);
     });
 
-    // app.get("/toys/:select", async (req, res) => {
-    //   if (req.params.select === "Ascending") {
-    //     const result = await toysCollection
-    //       .aggregate([
-    //         { $addFields: { convertedPrice: { $toInt: "$price" } } },
-    //         { $sort: { convertedPrice: 1 } },
-    //         { $project: { convertedPrice: 0 } },
-    //       ])
-    //       .toArray();
-    //     res.send(result);
-    //   } else if (req.params.select === "Descending") {
-    //     const result = await toysCollection
-    //       .aggregate([
-    //         { $addFields: { convertedPrice: { $toInt: "$price" } } },
-    //         { $sort: { convertedPrice: -1 } },
-    //         { $project: { convertedPrice: 0 } },
-    //       ])
-    //       .toArray();
-    //     res.send(result);
-    //   }
-    // });
+    app.get("/toys/:select", async (req, res) => {
+      const emailName = req.query.email;
+      console.log(emailName);
+      if (req.params.select === "Ascending") {
+        const result = await toysCollection
+          .aggregate([
+            {
+              $match: {
+                sellerEmail: req.query?.email, // Replace with your desired email
+              },
+            },
+            { $addFields: { convertedPrice: { $toInt: "$price" } } },
+            { $sort: { convertedPrice: 1 } },
+            { $project: { convertedPrice: 0 } },
+          ])
+          .toArray();
+        res.send(result);
+      } else if (req.params.select === "Descending") {
+        const result = await toysCollection
+          .aggregate([
+            {
+              $match: {
+                sellerEmail: req.query?.email, // Replace with your desired email
+              },
+            },
+            { $addFields: { convertedPrice: { $toInt: "$price" } } },
+            { $sort: { convertedPrice: -1 } },
+            { $project: { convertedPrice: 0 } },
+          ])
+          .toArray();
+        res.send(result);
+      } else {
+        const result = await toysCollection
+          .find({ sellerEmail: req.query?.email })
+          .toArray();
+        console.log(result);
+        res.send(result);
+      }
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(
