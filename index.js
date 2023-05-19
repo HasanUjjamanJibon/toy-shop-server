@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // await client.connect();
+    // client.connect();
     const toysCollection = await client.db("ToysDB").collection("Toys");
     const indexKeys = { toyName: 1 };
     const indexOptions = { name: "toyNameTitle" };
@@ -118,14 +118,13 @@ async function run() {
     });
 
     app.get("/toys/:select", async (req, res) => {
-      const emailName = req.query.email;
-      console.log(emailName);
+      const emailRef = req.query?.email;
       if (req.params.select === "Ascending") {
         const result = await toysCollection
           .aggregate([
             {
               $match: {
-                sellerEmail: req.query?.email, // Replace with your desired email
+                sellerEmail: emailRef, // Replace with your desired email
               },
             },
             { $addFields: { convertedPrice: { $toInt: "$price" } } },
@@ -139,7 +138,7 @@ async function run() {
           .aggregate([
             {
               $match: {
-                sellerEmail: req.query?.email, // Replace with your desired email
+                sellerEmail: emailRef, // Replace with your desired email
               },
             },
             { $addFields: { convertedPrice: { $toInt: "$price" } } },
@@ -150,9 +149,9 @@ async function run() {
         res.send(result);
       } else {
         const result = await toysCollection
-          .find({ sellerEmail: req.query?.email })
+          .find({ sellerEmail: emailRef })
           .toArray();
-        console.log(result);
+
         res.send(result);
       }
     });
