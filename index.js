@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // mongodb connected here
-
+// private repor
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.oxnofiz.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -20,11 +20,14 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  maxPoolSize: 20,
 });
 
 async function run() {
   try {
-     client.connect();
+    client.connect();
     const toysCollection = await client.db("ToysDB").collection("Toys");
     const indexKeys = { toyName: 1 };
     const indexOptions = { name: "toyNameTitle" };
@@ -40,7 +43,6 @@ async function run() {
     // step:2
     app.get("/alltoys", async (req, res) => {
       const result = await toysCollection.find().limit(20).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -97,13 +99,11 @@ async function run() {
     app.get("/alltoys/:category", async (req, res) => {
       if (req.params.category == "All") {
         const result = await toysCollection.find().toArray();
-        console.log(result);
         res.send(result);
       } else {
         const result = await toysCollection
           .find({ subCategory: req.params.category })
           .toArray();
-        console.log(result);
         res.send(result);
       }
     });
