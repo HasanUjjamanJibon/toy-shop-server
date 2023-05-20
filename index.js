@@ -117,6 +117,7 @@ async function run() {
       res.send(result);
     });
 
+     // step : 9
     app.get("/toys/:select", async (req, res) => {
       const emailRef = req.query?.email;
       if (req.params.select === "Ascending") {
@@ -156,12 +157,26 @@ async function run() {
       }
     });
 
+     // step : 10
     app.get("/moststock", async (req, res) => {
       const result = await toysCollection
         .aggregate([
           { $addFields: { convertedQuantity: { $toInt: "$quantity" } } },
           { $sort: { convertedQuantity: -1 } },
           { $project: { convertedQuantity: 0 } },
+        ])
+        .limit(8)
+        .toArray();
+      console.log(result);
+      res.send(result);
+    });
+     // step : 11
+    app.get("/bestseller", async (req, res) => {
+      const result = await toysCollection
+        .aggregate([
+          { $addFields: { convertedRatings: { $toInt: "$ratings" } } },
+          { $sort: { convertedRatings: -1 } },
+          { $project: { convertedRatings: 0 } },
         ])
         .limit(8)
         .toArray();
