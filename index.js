@@ -156,6 +156,19 @@ async function run() {
       }
     });
 
+    app.get("/moststock", async (req, res) => {
+      const result = await toysCollection
+        .aggregate([
+          { $addFields: { convertedQuantity: { $toInt: "$quantity" } } },
+          { $sort: { convertedQuantity: -1 } },
+          { $project: { convertedQuantity: 0 } },
+        ])
+        .limit(8)
+        .toArray();
+      console.log(result);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
